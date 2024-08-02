@@ -1,8 +1,10 @@
 from appium import webdriver
-# from appium.options.common.base import AppiumOptions 
 from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.webdriver import AppiumOptions
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 import os
+import traceback
 
 # For W3C actions
 from selenium.webdriver.common.action_chains import ActionChains
@@ -18,36 +20,52 @@ options = AppiumOptions()
 options.load_capabilities({
 	"appium:automationName": "UiAutomator2",
 	"appium:platformName": "Android",
-	"appium:platformVersion": "10",
-	"appium:deviceName": "8L8XQC5D9TMFY969",
+	"appium:platformVersion": "8.1.0",
+	"appium:deviceName": "H1AXGF00E288PKB",
 	"appium:app": apk_path,
 	"appium:newCommandTimeout": 3600,
 	"appium:connectHardwareKeyboard": True
 })
 
 driver = webdriver.Remote("http://127.0.0.1:4723", options=options)
+wait = WebDriverWait(driver, 10)
 
-menu_accessibility = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Access'ibility")
-menu_accessibility.click()
+try:
+    menu_accessibility = wait.until(
+        EC.visibility_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Access'ibility"))
+    )
+    print("Access'ibility menu is visible")
+    menu_accessibility.click()
 
-back_button = ActionChains(driver)
-back_button.w3c_actions = ActionBuilder(driver, mouse=PointerInput(interaction.POINTER_TOUCH, "touch"))
-back_button.w3c_actions.pointer_action.move_to_location(510, 1554)
-back_button.w3c_actions.pointer_action.pointer_down()
-back_button.w3c_actions.pointer_action.pause(0.1)
-back_button.w3c_actions.pointer_action.release()
-back_button.perform()
+    driver.back()
 
-menu_text = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Text")
-menu_text.click()
-menu_text_longtextbox = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="LogTextBox")
-menu_text_longtextbox.click()
+    menu_text = wait.until(
+        EC.visibility_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Text"))
+    )
+    print("Text menu is visible")
+    menu_text.click()
 
-field_longtextbox = driver.find_element(by=AppiumBy.ID, value="io.appium.android.apis:id/text")
-field_longtextbox.click()
-field_longtextbox.send_keys("jonathan hermawan")
+    menu_text_longtextbox = wait.until(
+        EC.visibility_of_element_located((AppiumBy.ACCESSIBILITY_ID, "LogTextBox"))
+    )
+    print("LogTextBox menu is visible")
+    menu_text_longtextbox.click()
 
-add_longtextbox = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Add")
-add_longtextbox.click()
+    field_longtextbox = wait.until(
+        EC.visibility_of_element_located((AppiumBy.ID, "io.appium.android.apis:id/text"))
+    )
+    print("LongTextBox field is visible")
+    field_longtextbox.click()
+    field_longtextbox.send_keys("jonathan hermawan")
 
-driver.quit()
+    add_longtextbox = wait.until(
+        EC.visibility_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Add"))
+    )
+    print("Add button is visible")
+    add_longtextbox.click()
+
+except Exception as e:
+    print(f"An error occurred: {e}")
+    traceback.print_exc()
+finally:
+    driver.quit()
